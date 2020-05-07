@@ -1,0 +1,14 @@
+{
+	"CreateTripFunction": {
+		"ENDPOINT_OVERRIDE": "http://docker.for.windows.localhost:8000",
+		"TABLE_NAME": "trip"
+	},
+	"SearchTripByIdFunction": {
+		"ENDPOINT_OVERRIDE": "http://docker.for.windows.localhost:8000",
+		"TABLE_NAME": "trip"
+	},
+	"SearchTripByDateFunction": {
+		"ENDPOINT_OVERRIDE": "http://docker.for.windows.localhost:8000",
+		"TABLE_NAME": "trip"
+	}
+}

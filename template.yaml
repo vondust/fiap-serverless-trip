@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    serverless-api-trip
+    Rest API to manage trips
+Globals:
+    Function:
+        Timeout: 360
+        MemorySize: 512
+        Environment:
+          Variables:
+            TABLE_NAME: !Ref TripTable
+            ENDPOINT_OVERRIDE: ""
+
+Resources:
+
+  CreateTripFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+     CodeUri: target/fiap-serverless-trip-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+     Handler: br.com.fiap.trip.serverless.handler.CreateTrip::handleRequest
+     Runtime: java8
+     Policies:
+       - DynamoDBCrudPolicy:
+           TableName: !Ref TripTable     
+     Events:
+       CreateTrip:
+         Type: Api
+         Properties:
+           Path: /trip
+           Method: post
+           
+  SearchTripByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+     CodeUri: target/fiap-serverless-trip-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+     Handler: br.com.fiap.trip.serverless.handler.SearchTripById::handleRequest
+     Runtime: java8
+     Policies:
+       - DynamoDBCrudPolicy:
+           TableName: !Ref TripTable     
+     Events:
+       SearchTripById:
+         Type: Api
+         Properties:
+           Path: /trip/{id}
+           Method: get
+
+  SearchTripByDateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+     CodeUri: target/fiap-serverless-trip-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+     Handler: br.com.fiap.trip.serverless.handler.SearchTripByDate::handleRequest
+     Runtime: java8
+     Policies:
+       - DynamoDBCrudPolicy:
+           TableName: !Ref TripTable     
+     Events:
+       SearchTripByDate:
+         Type: Api
+         Properties:
+           Path: /trip/period
+           Method: get
+           RequestParameters:
+              - method.request.querystring.starts
+              - method.request.querystring.ends
+              
+  TripTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: trip
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: dateTrip
+          AttributeType: S
+        - AttributeName: country
+          AttributeType: S
+        - AttributeName: city
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: dateTrip
+          KeyType: RANGE
+      LocalSecondaryIndexes: 
+        - IndexName: countryIndex
+          KeySchema: 
+            - AttributeName: id
+              KeyType: HASH
+            - AttributeName: country
+              KeyType: RANGE
+          Projection:
+             ProjectionType: ALL
+        - IndexName: cityIndex
+          KeySchema: 
+            - AttributeName: id
+              KeyType: HASH
+            - AttributeName: city
+              KeyType: RANGE
+          Projection:
+             ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST              
+
+Outputs:
+
+    CreateTripFunction:
+      Description: "CreateTrip Lambda Function ARN"
+      Value: !GetAtt CreateTripFunction.Arn
+      
+    SearchTripByIdFunction:
+      Description: "SearchTripById Lambda Function ARN"
+      Value: !GetAtt SearchTripByIdFunction.Arn
+      
+    SearchTripByDateFunction:
+      Description: "SearchTripByDate Lambda Function ARN"
+      Value: !GetAtt SearchTripByDateFunction.Arn
+      
