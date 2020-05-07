@@ -5,8 +5,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.s3.AmazonS3;
@@ -44,30 +42,32 @@ public class CreateTrip implements RequestHandler<HandlerRequest, HandlerRespons
 	}
 	
 	private String createBucket(final Trip trip) {
-		Regions defaultRegion = Regions.US_EAST_1;
+//		Regions defaultRegion = Regions.US_EAST_1;
         String bucketName = new StringBuilder()
-        		.append(trip.getCountry()).append("-")
-        		.append(trip.getCity()).append("-")
+        		.append(trip.getCountry().toLowerCase()).append("-")
+        		.append(trip.getCity().toLowerCase()).append("-")
         		.append(trip.getDateTrip())
         		.append(ThreadLocalRandom.current().nextLong(100000, 1000000))
         		.toString();
 
-//		try {
+		try {
 //			AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
 //					.withCredentials(new ProfileCredentialsProvider())
 //					.withRegion(defaultRegion).build();
-//
-//			if (!s3Client.doesBucketExistV2(bucketName)) {
-//				s3Client.createBucket(new CreateBucketRequest(bucketName));
-//
-//				String bucketLocation = s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
-//				System.out.println("Bucket location: " + bucketLocation);
-//			}
-//		} catch (AmazonServiceException e) {
-//			e.printStackTrace();
-//		} catch (SdkClientException e) {
-//			e.printStackTrace();
-//		}
+
+			AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
+
+			if (!s3Client.doesBucketExistV2(bucketName)) {
+				s3Client.createBucket(new CreateBucketRequest(bucketName));
+
+				String bucketLocation = s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
+				System.out.println("Bucket location: " + bucketLocation);
+			}
+		} catch (AmazonServiceException e) {
+			e.printStackTrace();
+		} catch (SdkClientException e) {
+			e.printStackTrace();
+		}
 
         return bucketName;
 	}
