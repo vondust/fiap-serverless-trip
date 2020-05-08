@@ -1,119 +1,39 @@
-## AWS SAM Application for Managing Study Data Lake
+## Aplicação AWS SAM para Gerenciamento de Fotos
 
-This is a sample application to demonstrate how to build an application on AWS Serverless Envinronment using the
-AWS SAM, Amazon API Gateway, AWS Lambda and Amazon DynamoDB.
-It also uses the DynamoDBMapper ORM structure to map Study items in a DynamoDB table to a RESTful API for managing Studies.
+## Requerimentos
 
-
-## Requirements
-
-* AWS CLI already configured with at least PowerUser permission
-* [Java SE Development Kit 8 installed](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-* [Docker installed](https://www.docker.com/community-edition)
+* AWS CLI já instalado e configurado com permissão mínima de PowerUser
+* [Java SE Development Kit 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* [Docker](https://www.docker.com/community-edition)
 * [Maven](https://maven.apache.org/install.html)
 * [SAM CLI](https://github.com/awslabs/aws-sam-cli)
 * [Python 3](https://docs.python.org/3/)
 
-## Setup process
+## Setup
 
-### Installing dependencies
+### Instalando dependências
 
-We use `maven` to install our dependencies and package our application into a JAR file:
+Use o `maven` para instalar as dependências e pacotes da aplicação, compilando tudo em um único arquivo Jar:
 
 ```bash
 mvn install
 ```
 
-### Local development
+### Desenvolvimento Local
 
-**Invoking function locally through local API Gateway**
-1. Start DynamoDB Local in a Docker container. `docker run -p 8000:8000 -v $(pwd)/local/dynamodb:/data/ amazon/dynamodb-local -jar DynamoDBLocal.jar -sharedDb -dbPath /data`
-2. Create the DynamoDB table. `aws dynamodb create-table --table-name study --attribute-definitions AttributeName=topic,AttributeType=S AttributeName=dateTimeCreation,AttributeType=S AttributeName=tag,AttributeType=S AttributeName=consumed,AttributeType=S --key-schema AttributeName=topic,KeyType=HASH AttributeName=dateTimeCreation,KeyType=RANGE --local-secondary-indexes 'IndexName=tagIndex,KeySchema=[{AttributeName=topic,KeyType=HASH},{AttributeName=tag,KeyType=RANGE}],Projection={ProjectionType=ALL}' 'IndexName=consumedIndex,KeySchema=[{AttributeName=topic,KeyType=HASH},{AttributeName=consumed,KeyType=RANGE}],Projection={ProjectionType=ALL}' --billing-mode PAY_PER_REQUEST --endpoint-url http://localhost:8000`
+**Invocando funções localmente através do API Gateway**
+1. Inicie o DynamoDB Local em um Container Docker. `docker run -p 8000:8000 -v $(pwd)/local/dynamodb:/data/ amazon/dynamodb-local -jar DynamoDBLocal.jar -sharedDb -dbPath /data`
+2. Crie a tabela trip no DynamoDB. `aws dynamodb create-table --table-name trip --attribute-definitions AttributeName=id,AttributeType=S AttributeName=dateTrip,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --global-secondary-indexes 'IndexName=dateTrip-index,KeySchema=[{AttributeName=id,KeyType=HASH},{AttributeName=dateTrip,KeyType=RANGE}],Projection={ProjectionType=ALL}' --billing-mode PAY_PER_REQUEST --endpoint-url http://localhost:8000`
 
-If the table already exist, you can delete: `aws dynamodb delete-table --table-name study --endpoint-url http://localhost:8000`
+Se a tabela já existe, é desejável que seja excluída primeiramente: `aws dynamodb delete-table --table-name trip --endpoint-url http://localhost:8000`
 
-3. Start the SAM local API.
- - On a Mac: `sam local start-api --env-vars src/test/resources/test_environment_mac.json`
- - On Windows: `sam local start-api --env-vars src/test/resources/test_environment_windows.json`
- - On Linux: `sam local start-api --env-vars src/test/resources/test_environment_linux.json`
+3. Inicie o local API do SAM.
+ - No Mac: `sam local start-api --env-vars src/test/resources/test_environment_mac.json`
+ - No Windows: `sam local start-api --env-vars src/test/resources/test_environment_windows.json`
+ - No Linux: `sam local start-api --env-vars src/test/resources/test_environment_linux.json`
 
-If the previous command ran successfully you should now be able to hit the following local endpoint to
-invoke the functions rooted at `http://localhost:3000/study/{topic}?starts=2020-01-02&ends=2020-02-02`.
-It shoud return 404. Now you can explore all endpoints, use the src/test/resources/Study DataLake.postman_collection.json to import a API Rest Collection into Postman.
+Se o comando anterior foi executado com sucesso, será então possível acessar o seguinte endpoint para realizar ações:  `http://localhost:3000/trip/period?start=2020-01-02&end=2020-02-02`.
 
-**SAM CLI** is used to emulate both Lambda and API Gateway locally and uses our `template.yaml` to
-understand how to bootstrap this environment (runtime, where the source code is, etc.) - The
-following excerpt is what the CLI will read in order to initialize an API and its routes:
+Utilize a coleção do Postman src/test/resources/34scj-serverless_trip.postman_collection.json, para explorar as outras funções.
 
-
-## Packaging and deployment
-
-AWS Lambda Java runtime accepts either a zip file or a standalone JAR file - We use the latter in
-this example. SAM will use `CodeUri` property to know where to look up for both application and
-dependencies:
-
-Firstly, we need a `S3 bucket` where we can upload our Lambda functions packaged as ZIP before we
-deploy anything - If you don't have a S3 bucket to store code artifacts then this is a good time to
-create one:
-
-```bash
-export BUCKET_NAME=my_cool_new_bucket
-aws s3 mb s3://$BUCKET_NAME
-```
-
-Next, run the following command to package our Lambda function to S3:
-
-```bash
-sam package \
-    --template-file template.yaml \
-    --output-template-file packaged.yaml \
-    --s3-bucket $BUCKET_NAME
-```
-
-Next, the following command will create a Cloudformation Stack and deploy your SAM resources.
-
-```bash
-sam deploy \
-    --template-file packaged.yaml \
-    --stack-name study-datalake \
-    --capabilities CAPABILITY_IAM
-```
-
-> **See [Serverless Application Model (SAM) HOWTO Guide](https://github.com/awslabs/serverless-application-model/blob/master/HOWTO.md) for more details in how to get started.**
-
-After deployment is complete you can run the following command to retrieve the API Gateway Endpoint URL:
-
-```bash
-aws cloudformation describe-stacks \
-    --stack-name sam-orderHandler \
-    --query 'Stacks[].Outputs'
-```
-
-# Appendix
-
-## AWS CLI commands
-
-AWS CLI commands to package, deploy and describe outputs defined within the cloudformation stack:
-
-```bash
-sam package \
-    --template-file template.yaml \
-    --output-template-file packaged.yaml \
-    --s3-bucket REPLACE_THIS_WITH_YOUR_S3_BUCKET_NAME
-
-sam deploy \
-    --template-file packaged.yaml \
-    --stack-name sam-orderHandler \
-    --capabilities CAPABILITY_IAM \
-    --parameter-overrides MyParameterSample=MySampleValue
-
-aws cloudformation describe-stacks \
-    --stack-name sam-orderHandler --query 'Stacks[].Outputs'
-```
-
-## Bringing to the next level
-
-Next, you can use the following resources to know more about beyond hello world samples and how others
-structure their Serverless applications:
-
-* [AWS Serverless Application Repository](https://aws.amazon.com/serverless/serverlessrepo/)
+**SAM CLI** é usado para emular o AWS Lambda e o AWS API Gateway localmente, usando o arquivo `template.yaml`.
