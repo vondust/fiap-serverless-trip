@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 
 import br.com.fiap.trip.datastore.config.DynamoDBManager;
@@ -31,13 +31,11 @@ public class TripDatastore {
 		params.put(":val1", new AttributeValue().withS(starts));
 		params.put(":val2", new AttributeValue().withS(ends));
 
-		final DynamoDBQueryExpression<Trip> queryExpression = new DynamoDBQueryExpression<Trip>()
-				.withKeyConditionExpression("dateTrip between :val1 and :val2")
+		DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+				.withFilterExpression("dateTrip between :val1 and :val2")
 				.withExpressionAttributeValues(params);
 
-		final List<Trip> studies = MAPPER.query(Trip.class, queryExpression);
-
-		return studies;
+		return MAPPER.scan(Trip.class, scanExpression);
 	}
 
 	public void delete(Trip input) {

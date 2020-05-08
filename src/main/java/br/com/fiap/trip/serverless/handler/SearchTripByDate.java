@@ -16,15 +16,14 @@ public class SearchTripByDate implements RequestHandler<HandlerRequest, HandlerR
 
 	@Override
 	public HandlerResponse handleRequest(final HandlerRequest request, final Context context) {
-		final String starts = request.getQueryStringParameters().get("starts");
-		final String ends = request.getQueryStringParameters().get("ends");
+		final String starts = request.getQueryStringParameters().get("start");
+		final String ends = request.getQueryStringParameters().get("end");
 
 		context.getLogger().log("Searching for registered trips between " + starts + " and " + ends);
-
 		final List<Trip> trips = this.repository.findByPeriod(starts, ends);
 
 		if (trips == null || trips.isEmpty())
-			return HandlerResponse.builder().setStatusCode(404).build();
+			return HandlerResponse.builder().setStatusCode(200).build();
 
 		return HandlerResponse.builder().setStatusCode(200).setObjectBody(trips).build();
 	}

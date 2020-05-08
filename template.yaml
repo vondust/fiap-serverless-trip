@@ -62,8 +62,8 @@ Resources:
            Path: /trip/period
            Method: get
            RequestParameters:
-              - method.request.querystring.starts
-              - method.request.querystring.ends
+              - method.request.querystring.start
+              - method.request.querystring.end
               
   TripTable:
     Type: AWS::DynamoDB::Table

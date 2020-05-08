@@ -7,7 +7,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import br.com.fiap.trip.datastore.TripDatastore;
 import br.com.fiap.trip.datastore.entity.Trip;
-import br.com.fiap.trip.datastore.exception.TripNotFoundException;
 import br.com.fiap.trip.serverless.model.HandlerRequest;
 import br.com.fiap.trip.serverless.model.HandlerResponse;
 
@@ -17,7 +16,7 @@ public class SearchTripById implements RequestHandler<HandlerRequest, HandlerRes
 
 	@Override
 	public HandlerResponse handleRequest(final HandlerRequest request, final Context context) {
-		
+
 		final String id = request.getPathParameters().get("id");
 		context.getLogger().log("[#] - Searching Trip by Id: " + id);
 		final Optional<Trip> tripRetrieved = datastore.search(id);
@@ -27,6 +26,6 @@ public class SearchTripById implements RequestHandler<HandlerRequest, HandlerRes
 			return HandlerResponse.builder().setObjectBody(tripRetrieved.get()).build();
 		}
 
-		throw new TripNotFoundException("[NotFound] - Trip id: " + id + " not found");
+		return HandlerResponse.builder().setStatusCode(404).build();
 	}
 }
