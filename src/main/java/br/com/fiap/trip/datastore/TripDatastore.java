@@ -16,14 +16,14 @@ public class TripDatastore {
 
 	private static final DynamoDBMapper MAPPER = DynamoDBManager.mapper();
 
-	public Optional<Trip> search(final String id) {
-		final Trip trip = MAPPER.load(Trip.class, id);
-		return Optional.ofNullable(trip);
-	}
-
 	public Trip save(final Trip trip) {
 		MAPPER.save(trip);
 		return trip;
+	}
+
+	public Optional<Trip> search(final String id) {
+		final Trip trip = MAPPER.load(Trip.class, id);
+		return Optional.ofNullable(trip);
 	}
 
 	public List<Trip> findByPeriod(final String starts, final String ends) {
@@ -32,7 +32,7 @@ public class TripDatastore {
 		params.put(":val2", new AttributeValue().withS(ends));
 
 		final DynamoDBQueryExpression<Trip> queryExpression = new DynamoDBQueryExpression<Trip>()
-				.withKeyConditionExpression("date between :val1 and :val2")
+				.withKeyConditionExpression("dateTrip between :val1 and :val2")
 				.withExpressionAttributeValues(params);
 
 		final List<Trip> studies = MAPPER.query(Trip.class, queryExpression);

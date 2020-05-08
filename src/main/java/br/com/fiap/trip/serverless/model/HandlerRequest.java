@@ -2,6 +2,9 @@ package br.com.fiap.trip.serverless.model;
 
 import java.util.Map;
 
+import lombok.ToString;
+
+@ToString
 public class HandlerRequest {
 
 	private String body;

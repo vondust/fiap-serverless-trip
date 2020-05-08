@@ -10,7 +10,6 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
-import com.amazonaws.services.s3.model.GetBucketLocationRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.fiap.trip.datastore.TripDatastore;
@@ -40,9 +39,8 @@ public class CreateTrip implements RequestHandler<HandlerRequest, HandlerRespons
 		final Trip tripRecorded = repository.save(trip);
 		return HandlerResponse.builder().setStatusCode(201).setObjectBody(tripRecorded).build();
 	}
-	
+
 	private String createBucket(final Trip trip) {
-//		Regions defaultRegion = Regions.US_EAST_1;
         String bucketName = new StringBuilder()
         		.append(trip.getCountry().toLowerCase()).append("-")
         		.append(trip.getCity().toLowerCase()).append("-")
@@ -51,17 +49,11 @@ public class CreateTrip implements RequestHandler<HandlerRequest, HandlerRespons
         		.toString();
 
 		try {
-//			AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-//					.withCredentials(new ProfileCredentialsProvider())
-//					.withRegion(defaultRegion).build();
-
 			AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
 
 			if (!s3Client.doesBucketExistV2(bucketName)) {
 				s3Client.createBucket(new CreateBucketRequest(bucketName));
-
-				String bucketLocation = s3Client.getBucketLocation(new GetBucketLocationRequest(bucketName));
-				System.out.println("Bucket location: " + bucketLocation);
+				return s3Client.getUrl(bucketName, null).toString();
 			}
 		} catch (AmazonServiceException e) {
 			e.printStackTrace();
