@@ -22,7 +22,8 @@ mvn install
 ### Desenvolvimento Local
 
 **Network Docker**
-Crie uma network docker através do seguinte comando `docker network create -d bridge lambda-local`
+
+Crie uma network docker através do seguinte comando:  `docker network create -d bridge lambda-local`
 
 **Invocando funções localmente através do API Gateway**
 1. Inicie o DynamoDB Local em um Container Docker. `docker run -d -p 8000:8000 --network lambda-local --name dynamodb-local amazon/dynamodb-local`
@@ -41,3 +42,40 @@ Se o comando anterior foi executado com sucesso, será então possível acessar 
 Utilize a coleção do Postman src/test/resources/34scj-serverless_trip.postman_collection.json, para explorar as outras funções.
 
 **SAM CLI** é usado para emular o AWS Lambda e o AWS API Gateway localmente, usando o arquivo `template.yaml`.
+
+## Packaging and deployment
+
+O AWS Lambda para runtime Java aceita tanto um arquivo zip quanto um arquivo JAR. O SAM usa a propriedade `CodeUri` para saber onde localizar a aplicação e suas dependências.
+
+Primeiro, precisamos de um `bucket S3` na qual podemos fazer o upload das funções Lambda empacotadas no ZIP, antes de implantar qualquer coisa.
+
+```bash
+export BUCKET_NAME=my_new_bucket_name
+aws s3 mb s3://$BUCKET_NAME
+```
+
+Agora, execute o seguinte comando para 'empacotar' nossas funções Lambda para o S3:
+
+```bash
+sam package \
+    --template-file template.yaml \
+    --output-template-file packaged.yaml \
+    --s3-bucket $BUCKET_NAME
+```
+
+O próximo comando cria um Stack Cloudformation e implanta os nossos recursos SAM:
+
+```bash
+sam deploy \
+    --template-file packaged.yaml \
+    --stack-name study-datalake \
+    --capabilities CAPABILITY_IAM
+```
+
+Após completar a implantação, podemos executar o seguinte comando, a fim de buscar a URL do API Gateway criado na AWS:
+
+```bash
+aws cloudformation describe-stacks \
+    --stack-name sam-orderHandler \
+    --query 'Stacks[].Outputs'
+```
