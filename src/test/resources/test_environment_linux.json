@@ -1,14 +1,14 @@
 {
 	"CreateTripFunction": {
-		"ENDPOINT_OVERRIDE": "http://dynamodb-local:8000",
+		"ENDPOINT_OVERRIDE": "http://127.0.0.1:8000",
 		"TABLE_NAME": "trip"
 	},
 	"SearchTripByIdFunction": {
-		"ENDPOINT_OVERRIDE": "http://dynamodb-local:8000",
+		"ENDPOINT_OVERRIDE": "http://127.0.0.1:8000",
 		"TABLE_NAME": "trip"
 	},
 	"SearchTripByDateFunction": {
-		"ENDPOINT_OVERRIDE": "http://dynamodb-local:8000",
+		"ENDPOINT_OVERRIDE": "http://127.0.0.1:8000",
 		"TABLE_NAME": "trip"
 	}
 }

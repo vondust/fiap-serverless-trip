@@ -1,0 +1,112 @@
+{
+	"info": {
+		"_postman_id": "1a2590a8-ca68-448f-8ade-36271218f9bb",
+		"name": "34scj-serverless_trip",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "trip",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"dateTrip\": \"2020-05-03\",\n\t\"country\": \"Brazil\",\n\t\"city\": \"Maragogi\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{local}}/trip",
+					"host": [
+						"{{local}}"
+					],
+					"path": [
+						"trip"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "trip by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{local}}/trip/c404835c-8e60-4416-bb61-6769c17707e0",
+					"host": [
+						"{{local}}"
+					],
+					"path": [
+						"trip",
+						"c404835c-8e60-4416-bb61-6769c17707e0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "trip by date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{local}}/trip/period?start=2020-05-01&end=2020-05-02",
+					"host": [
+						"{{local}}"
+					],
+					"path": [
+						"trip",
+						"period"
+					],
+					"query": [
+						{
+							"key": "start",
+							"value": "2020-05-01"
+						},
+						{
+							"key": "end",
+							"value": "2020-05-02"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "b6096f1e-fe0e-420e-bb60-cc3f40da9b09",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "f9011334-4b0a-4a23-bc8e-a852516dda40",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "e0edf4e2-29b8-47eb-8a5e-181a0fa86c59",
+			"key": "local",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
